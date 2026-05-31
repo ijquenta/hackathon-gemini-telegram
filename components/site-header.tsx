@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "framer-motion"
-import { SunIcon, BellIcon } from "lucide-react"
+import { BellIcon } from "lucide-react"
+import Image from "next/image"
 import { SolAvatar } from "@/components/ui/SolAvatar"
 import { useStore } from "@/lib/store"
 
@@ -20,10 +21,15 @@ export function SiteHeader() {
         onClick={() => router.push("/dashboard")}
         className="flex items-center gap-2.5 shrink-0 group"
       >
-        <div className="size-8 rounded-xl flex items-center justify-center bg-gradient-to-br from-violet-600 to-violet-800">
-          <SunIcon className="size-4 text-yellow-300" />
-        </div>
-        <span className="font-bold text-sm text-white group-hover:text-violet-300 transition-colors">BancoSol</span>
+        <Image
+          src="/bancosol-logo.svg"
+          alt="BancoSol"
+          width={36}
+          height={36}
+          className="size-9 drop-shadow-md"
+          priority
+        />
+        <span className="font-bold text-sm text-white group-hover:text-orange-300 transition-colors">BancoSol</span>
       </button>
 
       <div className="h-5 w-px bg-white/10 mx-1" />
