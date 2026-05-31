@@ -1,11 +1,7 @@
-import { TicketsDashboard } from "@/components/tickets-dashboard";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen w-full flex-col bg-background">
-      <TicketsDashboard />
-    </main>
-  );
+  redirect("/dashboard");
 }
 
 

@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 // 1. Array de datos mock (simulando la base de datos)
 const TICKETS_MOCK = [
@@ -63,51 +64,56 @@ const TICKETS_MOCK = [
 
 export function TicketsDashboard() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex items-center">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Gestión de Tickets
-        </h1>
+    <div className="flex flex-col gap-4 px-4 lg:px-6">
+      {/* Encabezado de sección */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
+          Tickets Recientes
+        </h2>
+        <span className="text-xs text-muted-foreground">{TICKETS_MOCK.length} tickets</span>
       </div>
+      <Separator />
 
-      {/* 2. Grid Responsivo (reemplazando la tabla tradicional) */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Grid responsivo de tickets */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {TICKETS_MOCK.map((ticket) => {
-          // Lógica de estilos condicionales estrictos basados en la prioridad
           const isHighPriority = ticket.prioridad === "Alta";
-          
+
           const cardStyle = isHighPriority
-            ? "border-red-500 bg-red-950/30 dark:border-red-500 dark:bg-red-950/30"
-            : "border-green-500 bg-green-950/30 dark:border-green-500 dark:bg-green-950/30";
+            ? "border-red-500/60 bg-red-950/20"
+            : "border-green-500/60 bg-green-950/20";
 
           return (
             <Card key={ticket.id} className={`transition-colors ${cardStyle}`}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {ticket.id} - {ticket.cliente}
-                </CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <div className="flex flex-col gap-0.5">
+                  <CardTitle className="text-xs font-semibold text-muted-foreground">
+                    {ticket.id}
+                  </CardTitle>
+                  <span className="text-sm font-medium text-foreground">
+                    {ticket.cliente}
+                  </span>
+                </div>
                 <Badge
-                  variant={isHighPriority ? "destructive" : "default"}
+                  variant={isHighPriority ? "destructive" : "outline"}
                   className={
                     !isHighPriority
-                      ? "bg-green-600 hover:bg-green-700 text-white"
-                      : ""
+                      ? "border-green-500/60 text-green-400 text-xs"
+                      : "text-xs"
                   }
                 >
                   {ticket.prioridad}
                 </Badge>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2 min-h-[40px]">
+              <CardContent className="pt-0">
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                   {ticket.problema_resumido}
                 </p>
-                
-                {/* 3. Badges para Sentimiento y Estado */}
-                <div className="flex items-center gap-2 mt-4">
-                  <Badge variant="outline" className="bg-background/50 backdrop-blur-sm">
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="secondary" className="text-xs px-1.5 py-0">
                     {ticket.sentimiento}
                   </Badge>
-                  <Badge variant="secondary" className="bg-background/50 backdrop-blur-sm">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0">
                     {ticket.estado}
                   </Badge>
                 </div>
@@ -119,3 +125,4 @@ export function TicketsDashboard() {
     </div>
   );
 }
+
