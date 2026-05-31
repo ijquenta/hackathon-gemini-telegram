@@ -28,7 +28,7 @@ const data = {
       icon: <TicketIcon />,
     },
     {
-      title: "Base de conocimiento",
+      title: "Playbooks",
       url: "/dashboard/playbooks",
       icon: <BookOpenIcon />,
     },
