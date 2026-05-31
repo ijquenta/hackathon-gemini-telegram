@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { TicketIcon, BookOpenIcon, CommandIcon } from "lucide-react"
+import { TicketIcon, BookOpenIcon, CommandIcon, BotIcon } from "lucide-react"
 
 const data = {
   user: {
@@ -31,6 +31,11 @@ const data = {
       title: "Playbooks",
       url: "/dashboard/playbooks",
       icon: <BookOpenIcon />,
+    },
+    {
+      title: "Sol AI",
+      url: "/chat",
+      icon: <BotIcon />,
     },
   ],
 }

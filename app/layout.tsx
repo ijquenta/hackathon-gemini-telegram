@@ -27,9 +27,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased dark`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
+        <ThemeProvider forcedTheme="dark">
           <TooltipProvider>{children}</TooltipProvider>
         </ThemeProvider>
       </body>

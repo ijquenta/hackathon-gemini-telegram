@@ -5,7 +5,8 @@ import { Badge } from "@/components/reui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { LayoutGrid, Table as TableIcon, CircleIcon, CircleDot, CircleCheckIcon } from "lucide-react"
+import { LayoutGrid, Table as TableIcon, CircleIcon, CircleDot, CircleCheckIcon, MessageSquareIcon } from "lucide-react"
+import Link from "next/link"
 import {
   Frame,
   FrameHeader,
@@ -33,6 +34,7 @@ interface Ticket {
   estado: "Pendiente" | "En Proceso" | "Resuelto"
   sentimiento: "Enojado" | "Muy Enojado" | "Preocupado" | "Ansioso" | "Calmo"
   tiempo_asfi: string | null
+  chatTipo: number
 }
 
 const kanbanColumns: Record<ColumnKey, Ticket[]> = {
@@ -47,6 +49,7 @@ const kanbanColumns: Record<ColumnKey, Ticket[]> = {
       estado: "Pendiente",
       sentimiento: "Enojado",
       tiempo_asfi: "00:15:22",
+      chatTipo: 1,
     },
     {
       id: "TK-8890",
@@ -58,6 +61,7 @@ const kanbanColumns: Record<ColumnKey, Ticket[]> = {
       estado: "Pendiente",
       sentimiento: "Preocupado",
       tiempo_asfi: "04:30:00",
+      chatTipo: 6,
     },
   ],
   "En Proceso": [
@@ -71,6 +75,7 @@ const kanbanColumns: Record<ColumnKey, Ticket[]> = {
       estado: "En Proceso",
       sentimiento: "Muy Enojado",
       tiempo_asfi: "01:10:00",
+      chatTipo: 4,
     },
     {
       id: "TK-8901",
@@ -82,6 +87,7 @@ const kanbanColumns: Record<ColumnKey, Ticket[]> = {
       estado: "En Proceso",
       sentimiento: "Ansioso",
       tiempo_asfi: "02:45:00",
+      chatTipo: 8,
     },
   ],
   Resuelto: [
@@ -95,6 +101,7 @@ const kanbanColumns: Record<ColumnKey, Ticket[]> = {
       estado: "Resuelto",
       sentimiento: "Calmo",
       tiempo_asfi: null,
+      chatTipo: 11,
     },
     {
       id: "TK-8899",
@@ -106,6 +113,7 @@ const kanbanColumns: Record<ColumnKey, Ticket[]> = {
       estado: "Resuelto",
       sentimiento: "Calmo",
       tiempo_asfi: null,
+      chatTipo: 11,
     },
   ],
 }
@@ -156,6 +164,15 @@ function TaskCard({
           <span className="rounded-full border border-border/50 bg-background px-2 py-1">
             {task.tiempo_asfi ?? "Sin tiempo"}
           </span>
+        </div>
+        <div className="mt-3">
+          <Link
+            href={`/chat?tipo=${task.chatTipo}`}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            <MessageSquareIcon className="size-3.5" />
+            Chatear con Sol AI
+          </Link>
         </div>
       </FramePanel>
     </Frame>
@@ -269,6 +286,7 @@ export default function TicketsBoardClient() {
                         <TableHead>Estado</TableHead>
                         <TableHead>Sentimiento</TableHead>
                         <TableHead>Tiempo ASFI</TableHead>
+                        <TableHead>Sol AI</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -285,6 +303,15 @@ export default function TicketsBoardClient() {
                           <TableCell>{ticket.estado}</TableCell>
                           <TableCell>{ticket.sentimiento}</TableCell>
                           <TableCell>{ticket.tiempo_asfi ?? "-"}</TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/chat?tipo=${ticket.chatTipo}`}
+                              className="inline-flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                            >
+                              <MessageSquareIcon className="size-3.5" />
+                              Chatear
+                            </Link>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
