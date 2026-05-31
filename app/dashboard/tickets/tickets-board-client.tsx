@@ -21,7 +21,6 @@ import {
   KanbanItemHandle,
   KanbanOverlay,
 } from "@/components/reui/kanban"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 type ColumnKey = "Pendiente" | "En Proceso" | "Resuelto"
 
@@ -243,7 +242,6 @@ export default function TicketsBoardClient() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <ThemeToggle />
               <TabsList className="inline-flex rounded-xl bg-muted p-[3px]">
                 <TabsTrigger value="tabla" className="gap-2">
                   <TableIcon className="size-4 text-muted-foreground" />

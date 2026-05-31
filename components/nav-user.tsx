@@ -20,7 +20,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon, Moon, SunMedium } from "lucide-react"
+import { useTheme } from "next-themes"
+import * as React from "react"
 
 export function NavUser({
   user,
@@ -32,6 +34,10 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { setMounted(true) }, [])
+  const isDark = mounted ? (theme === "system" ? resolvedTheme : theme) === "dark" : false
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -91,6 +97,13 @@ export function NavUser({
                 <BellIcon
                 />
                 Notifications
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => setTheme(isDark ? "light" : "dark")}>
+                {isDark ? <SunMedium className="size-4" /> : <Moon className="size-4" />}
+                {isDark ? "Cambiar a Claro" : "Cambiar a Oscuro"}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

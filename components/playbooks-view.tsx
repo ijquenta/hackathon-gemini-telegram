@@ -295,7 +295,7 @@ export default function PlaybooksView() {
           NAVEGACIÓN PRINCIPAL — Tabs de nivel superior
       ════════════════════════════════════════════════════════════════════════ */}
       <Tabs defaultValue="manuales" className="w-full">
-        <TabsList className="bg-zinc-900 border border-zinc-800 h-10 p-1">
+        <TabsList className="bg-card border border-border h-10 p-1">
           <TabsTrigger
             value="manuales"
             className="data-active:bg-purple-900/60 data-active:text-purple-200 data-active:border-purple-700/50 data-active:shadow-none"
@@ -327,7 +327,7 @@ export default function PlaybooksView() {
         {/* Encabezado de sección */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-foreground">
               Manuales de Soporte
             </h2>
             <span className="inline-flex items-center rounded-full bg-purple-900/60 px-2.5 py-0.5 text-xs font-medium text-purple-300 border border-purple-700/50">
@@ -341,7 +341,7 @@ export default function PlaybooksView() {
             <Input
               type="search"
               placeholder="Buscar playbooks, códigos de error..."
-              className="pl-9 h-9 bg-zinc-900 border-zinc-700 text-zinc-200 placeholder:text-zinc-500 focus-visible:border-purple-600 focus-visible:ring-purple-600/20"
+              className="pl-9 h-9 bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:border-purple-600 focus-visible:ring-purple-600/20"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
@@ -350,7 +350,7 @@ export default function PlaybooksView() {
 
         {/* Grid de cards */}
         {playbooksFiltrados.length === 0 ? (
-          <p className="text-sm text-zinc-500 text-center py-10">
+          <p className="text-sm text-muted-foreground text-center py-10">
             No se encontraron manuales para "{busqueda}".
           </p>
         ) : (
@@ -360,12 +360,12 @@ export default function PlaybooksView() {
               return (
                 <div
                   key={playbook.id}
-                  className="flex flex-col rounded-2xl border border-zinc-800 bg-zinc-900 shadow-xl shadow-purple-900/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-purple-700/20 overflow-hidden"
+                  className="flex flex-col rounded-2xl border border-border bg-card shadow-xl shadow-purple-900/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-purple-700/20 overflow-hidden"
                 >
                   {/* Cabecera de la card */}
                   <div className="flex items-start justify-between p-5 pb-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted border border-border">
                         {playbook.icono}
                       </div>
                       <div className="flex flex-col gap-1">
@@ -380,10 +380,10 @@ export default function PlaybooksView() {
 
                   {/* Título y descripción */}
                   <div className="px-5 pb-2 flex flex-col gap-1">
-                    <h3 className="text-sm font-semibold text-white leading-snug">
+                    <h3 className="text-sm font-semibold text-foreground leading-snug">
                       {playbook.titulo}
                     </h3>
-                    <p className="text-xs text-zinc-400 line-clamp-1">
+                    <p className="text-xs text-muted-foreground line-clamp-1">
                       {playbook.descripcion}
                     </p>
                   </div>
@@ -417,7 +417,7 @@ export default function PlaybooksView() {
                         {playbook.pasos.map((paso) => (
                           <li
                             key={paso.numero}
-                            className="flex items-start gap-2.5 text-xs text-zinc-300"
+                            className="flex items-start gap-2.5 text-xs text-foreground/80"
                           >
                             <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-purple-900/60 text-purple-300 font-bold text-[10px] border border-purple-800/50 mt-px">
                               {paso.numero}
@@ -431,7 +431,7 @@ export default function PlaybooksView() {
                     {/* Botón Ver detalle — abre el Sheet lateral */}
                     <button
                       onClick={() => setSelectedPlaybook(playbook)}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-white transition-colors w-full mt-1 border-t border-zinc-800 pt-3"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors w-full mt-1 border-t border-border pt-3"
                     >
                       Ver detalle →
                     </button>
@@ -455,7 +455,7 @@ export default function PlaybooksView() {
           <div className="flex size-8 items-center justify-center rounded-xl bg-linear-to-br from-orange-600 to-orange-400">
             <Sparkles className="size-4 text-white" />
           </div>
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-foreground">
             Generar Playbook con IA
           </h2>
           <span className="inline-flex items-center rounded-full bg-orange-900/50 px-2.5 py-0.5 text-xs font-medium text-orange-300 border border-orange-700/50">
@@ -464,17 +464,17 @@ export default function PlaybooksView() {
         </div>
 
         {/* Formulario de generación */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 shadow-xl shadow-purple-900/10 p-6 flex flex-col gap-5">
+        <div className="rounded-2xl border border-border bg-card shadow-xl shadow-purple-900/10 p-6 flex flex-col gap-5">
 
           {/* Input: título del manual */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Título del nuevo manual
             </label>
             <Input
               type="text"
               placeholder="Ej: Pasos para desbloqueo de cuenta PyME..."
-              className="h-10 bg-zinc-800 border-zinc-700 text-zinc-200 placeholder:text-zinc-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/20"
+              className="h-10 bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:border-orange-500 focus-visible:ring-orange-500/20"
               value={tituloIA}
               onChange={(e) => setTituloIA(e.target.value)}
             />
@@ -482,13 +482,13 @@ export default function PlaybooksView() {
 
           {/* Textarea: procedimiento en bruto */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Procedimiento en bruto
             </label>
             <textarea
               rows={5}
               placeholder="Pega aquí la solución técnica que encontraste. Ej: El error 500 en el QR ocurre cuando el servicio de pagos está caído. La solución es reiniciar el proceso XYZ..."
-              className="min-h-30 w-full resize-y rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-500 outline-none transition-colors focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20"
+              className="min-h-30 w-full resize-y rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20"
               value={procedimiento}
               onChange={(e) => setProcedimiento(e.target.value)}
             />
@@ -514,7 +514,7 @@ export default function PlaybooksView() {
             {vistaPrevia && (
               <button
                 onClick={handleGuardar}
-                className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-200 transition-all duration-200 hover:bg-zinc-700 hover:border-zinc-600"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-muted px-4 py-2 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted/80 hover:border-border"
               >
                 <Save className="size-4" />
                 Guardar en Base de Conocimiento
@@ -525,10 +525,10 @@ export default function PlaybooksView() {
 
         {/* Vista previa del playbook generado */}
         {vistaPrevia && (
-          <div className="rounded-2xl border border-purple-800/50 bg-zinc-900/80 shadow-xl shadow-purple-900/20 p-6 flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="rounded-2xl border border-purple-800/50 bg-card shadow-xl shadow-purple-900/20 p-6 flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="size-5 text-purple-400" />
-              <h3 className="text-base font-semibold text-white">
+              <h3 className="text-base font-semibold text-foreground">
                 Vista Previa del Playbook Generado
               </h3>
             </div>
@@ -547,10 +547,10 @@ export default function PlaybooksView() {
                     <CheckCircle2 className="size-3.5 text-purple-400" />
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-semibold text-white">
+                    <span className="text-sm font-semibold text-foreground">
                       Paso {paso.numero}: {paso.titulo}
                     </span>
-                    <span className="text-xs text-zinc-400 leading-relaxed">
+                    <span className="text-xs text-muted-foreground leading-relaxed">
                       {paso.detalle}
                     </span>
                   </div>
@@ -575,7 +575,7 @@ export default function PlaybooksView() {
           <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-200 data-starting-style:opacity-0 data-ending-style:opacity-0" />
 
           {/* Popup centrado */}
-          <DialogPrimitive.Popup className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-2xl max-h-[88vh] -translate-x-1/2 -translate-y-1/2 flex flex-col rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-purple-900/30 overflow-hidden transition-all duration-200 data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95">
+          <DialogPrimitive.Popup className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-2xl max-h-[88vh] -translate-x-1/2 -translate-y-1/2 flex flex-col rounded-2xl border border-border bg-card shadow-2xl shadow-purple-900/30 overflow-hidden transition-all duration-200 data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95">
             {selectedPlaybook && (() => {
               const detalle = PLAYBOOK_SHEET_DATA[selectedPlaybook.id]
               return (
@@ -583,11 +583,11 @@ export default function PlaybooksView() {
                   {/* ── Header: icono + título + badge + botón X ── */}
                   <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4">
                     <div className="flex items-start gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted border border-border">
                         {selectedPlaybook.icono}
                       </div>
                       <div className="flex flex-col gap-2">
-                        <DialogPrimitive.Title className="text-white text-base font-semibold leading-snug">
+                        <DialogPrimitive.Title className="text-foreground text-base font-semibold leading-snug">
                           {selectedPlaybook.titulo}
                         </DialogPrimitive.Title>
                         <span
@@ -600,7 +600,7 @@ export default function PlaybooksView() {
                     {/* Botón X para cerrar */}
                     <DialogPrimitive.Close
                       onClick={() => setSelectedPlaybook(null)}
-                      className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors text-lg leading-none"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors text-lg leading-none"
                     >
                       ×
                     </DialogPrimitive.Close>
@@ -611,7 +611,7 @@ export default function PlaybooksView() {
                   {/* ── Tabs con dos secciones ── */}
                   <div className="flex-1 overflow-y-auto px-6 py-5">
                     <Tabs defaultValue="descripcion">
-                      <TabsList className="mb-5 bg-zinc-800 border border-zinc-700">
+                      <TabsList className="mb-5 bg-muted border border-border">
                         <TabsTrigger value="descripcion">Descripción</TabsTrigger>
                         <TabsTrigger value="pasos">
                           Pasos de resolución
@@ -624,10 +624,10 @@ export default function PlaybooksView() {
                       {/* Tab 1 — Descripción del problema + info adicional */}
                       <TabsContent value="descripcion" className="flex flex-col gap-5">
                         <div className="flex flex-col gap-2">
-                          <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Descripción del problema
                           </h4>
-                          <p className="text-sm text-zinc-300 leading-relaxed">
+                          <p className="text-sm text-foreground/80 leading-relaxed">
                             {detalle.descripcionLarga}
                           </p>
                         </div>
@@ -636,21 +636,21 @@ export default function PlaybooksView() {
 
                         {/* Cards de información adicional */}
                         <div className="flex flex-col gap-3">
-                          <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Información adicional
                           </h4>
                           <div className="grid grid-cols-3 gap-3">
-                            <div className="rounded-xl border border-zinc-700 bg-zinc-800/60 p-3 flex flex-col gap-1">
-                              <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Tiempo estimado</span>
-                              <span className="text-sm font-semibold text-white">{detalle.tiempoEstimado}</span>
+                            <div className="rounded-xl border border-border bg-muted/60 p-3 flex flex-col gap-1">
+                              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Tiempo estimado</span>
+                              <span className="text-sm font-semibold text-foreground">{detalle.tiempoEstimado}</span>
                             </div>
-                            <div className="rounded-xl border border-zinc-700 bg-zinc-800/60 p-3 flex flex-col gap-1">
-                              <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Área responsable</span>
-                              <span className="text-sm font-semibold text-white">{detalle.areaResponsable}</span>
+                            <div className="rounded-xl border border-border bg-muted/60 p-3 flex flex-col gap-1">
+                              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Área responsable</span>
+                              <span className="text-sm font-semibold text-foreground">{detalle.areaResponsable}</span>
                             </div>
-                            <div className="rounded-xl border border-zinc-700 bg-zinc-800/60 p-3 flex flex-col gap-1">
-                              <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">Última actualización</span>
-                              <span className="text-sm font-semibold text-white">{detalle.ultimaActualizacion}</span>
+                            <div className="rounded-xl border border-border bg-muted/60 p-3 flex flex-col gap-1">
+                              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Última actualización</span>
+                              <span className="text-sm font-semibold text-foreground">{detalle.ultimaActualizacion}</span>
                             </div>
                           </div>
                         </div>
@@ -665,8 +665,8 @@ export default function PlaybooksView() {
                                 {paso.numero}
                               </span>
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-sm font-semibold text-white">{paso.titulo}</span>
-                                <span className="text-xs text-zinc-400 leading-relaxed">{paso.descripcion}</span>
+                                <span className="text-sm font-semibold text-foreground">{paso.titulo}</span>
+                                <span className="text-xs text-muted-foreground leading-relaxed">{paso.descripcion}</span>
                               </div>
                             </li>
                           ))}
@@ -676,10 +676,10 @@ export default function PlaybooksView() {
                   </div>
 
                   {/* ── Footer: Cerrar + Editar Manual ── */}
-                  <div className="flex items-center gap-3 px-6 py-4 border-t border-zinc-800">
+                  <div className="flex items-center gap-3 px-6 py-4 border-t border-border">
                     <DialogPrimitive.Close
                       onClick={() => setSelectedPlaybook(null)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-transparent px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+                      className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-muted transition-colors"
                     >
                       Cerrar
                     </DialogPrimitive.Close>
