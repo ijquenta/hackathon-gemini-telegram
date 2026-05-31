@@ -1,7 +1,7 @@
 "use client"
 
 // ─── Importaciones ────────────────────────────────────────────────────────────
-import { useState } from "react"
+import React, { useState } from "react"
 import {
   Search,
   BookOpen,
@@ -16,6 +16,9 @@ import {
   CheckCircle2,
   Loader2,
   Edit,
+  ThumbsUp,
+  Trash2,
+  Lightbulb,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -214,6 +217,52 @@ const PLAYBOOK_SHEET_DATA: Record<number, PlaybookDetalleSheet> = {
   },
 }
 
+// ─── Sugerencias de playbooks propuestos por la IA ───────────────────────────
+interface SugerenciaPlaybook {
+  id: number
+  titulo: string
+  categoria: string
+  descripcion: string
+  pasos: Paso[]
+}
+
+const SUGERENCIAS_IA_MOCK: SugerenciaPlaybook[] = [
+  {
+    id: 101,
+    titulo: "Actualización de Datos Personales Fallida",
+    categoria: "Configuración",
+    descripcion: "Protocolo cuando el cliente no puede actualizar su dirección, teléfono o email desde la app.",
+    pasos: [
+      { numero: 1, descripcion: "Verificar si el cliente tiene sesión activa y token de sesión vigente." },
+      { numero: 2, descripcion: "Comprobar que los datos ingresados cumplen el formato requerido (teléfono con código de área, email válido)." },
+      { numero: 3, descripcion: "Si el error persiste, actualizar los datos directamente desde el sistema core y notificar al cliente." },
+    ],
+  },
+  {
+    id: 102,
+    titulo: "Tarjeta Bloqueada por Uso Internacional",
+    categoria: "Configuración",
+    descripcion: "Desbloqueo de tarjetas bloqueadas automáticamente por transacciones en el exterior.",
+    pasos: [
+      { numero: 1, descripcion: "Confirmar la identidad del titular y verificar que el viaje sea legítimo." },
+      { numero: 2, descripcion: "Habilitar el uso internacional temporalmente desde el panel de gestión de tarjetas." },
+      { numero: 3, descripcion: "Establecer límite de tiempo para el uso internacional según indicación del cliente." },
+      { numero: 4, descripcion: "Registrar la habilitación en el sistema y notificar al cliente por SMS." },
+    ],
+  },
+  {
+    id: 103,
+    titulo: "Error en Pago de Servicios por CBU",
+    categoria: "Transferencias",
+    descripcion: "Resolución de fallos al pagar servicios (luz, gas, agua) mediante CBU desde AppSol.",
+    pasos: [
+      { numero: 1, descripcion: "Verificar que el CBU del servicio esté activo y actualizado en el sistema de pagos." },
+      { numero: 2, descripcion: "Comprobar que el cliente tenga saldo suficiente y límites disponibles." },
+      { numero: 3, descripcion: "Si el CBU es correcto y hay saldo, escalar al equipo de integraciones con el código de error." },
+    ],
+  },
+]
+
 // ─── Pasos mock generados por IA ─────────────────────────────────────────────
 const PASOS_IA_MOCK: PasoGenerado[] = [
   {
@@ -237,14 +286,30 @@ const PASOS_IA_MOCK: PasoGenerado[] = [
 // Componente: PlaybooksView
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function PlaybooksView() {
+  // ── Estado: lista dinámica de playbooks (se puede ampliar con sugerencias) ──
+  const [playbooks, setPlaybooks] = useState<Playbook[]>(PLAYBOOKS_MOCK)
+
+  // ── Estado: sugerencias de IA pendientes de revisar ─────────────────────────
+  const [sugerencias, setSugerencias] = useState<SugerenciaPlaybook[]>(SUGERENCIAS_IA_MOCK)
+
   // ── Estado: buscador ────────────────────────────────────────────────────────
   const [busqueda, setBusqueda] = useState<string>("")
 
   // ── Estado: qué cards tienen los pasos expandidos ──────────────────────────
   const [expandidos, setExpandidos] = useState<Set<number>>(new Set())
 
-  // ── Estado: playbook seleccionado para el Sheet lateral ─────────────────────
+  // ── Estado: acordeón "Más Playbooks" ────────────────────────────────────────
+  const [acordeonAbierto, setAcordeonAbierto] = useState<boolean>(true)
+  const [expandidosAcordeon, setExpandidosAcordeon] = useState<Set<number>>(new Set())
+
+  // ── Estado: playbook seleccionado para el modal de detalle ──────────────────
   const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null)
+
+  // ── Estado: modal de edición ────────────────────────────────────────────────
+  const [editandoPlaybook, setEditandoPlaybook] = useState<Playbook | null>(null)
+  const [editTitulo, setEditTitulo] = useState<string>("")
+  const [editDescripcion, setEditDescripcion] = useState<string>("")
+  const [editPasos, setEditPasos] = useState<Paso[]>([])
 
   // ── Estado: sección "Crear con IA" ─────────────────────────────────────────
   const [tituloIA, setTituloIA]             = useState<string>("")
@@ -253,7 +318,7 @@ export default function PlaybooksView() {
   const [vistaPrevia, setVistaPrevia]       = useState<boolean>(false)
 
   // ── Filtrado en tiempo real ─────────────────────────────────────────────────
-  const playbooksFiltrados = PLAYBOOKS_MOCK.filter((p) =>
+  const playbooksFiltrados = playbooks.filter((p) =>
     p.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
     p.categoria.toLowerCase().includes(busqueda.toLowerCase())
   )
@@ -265,6 +330,72 @@ export default function PlaybooksView() {
       next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
+  }
+
+  // ── Alternar expansión en el acordeón ───────────────────────────────────────
+  function toggleAcordeon(id: number) {
+    setExpandidosAcordeon((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+
+  function abrirEdicion(playbook: Playbook) {
+    setEditandoPlaybook(playbook)
+    setEditTitulo(playbook.titulo)
+    setEditDescripcion(playbook.descripcion)
+    setEditPasos(playbook.pasos.map((p) => ({ ...p })))
+    setSelectedPlaybook(null)
+  }
+
+  // ── Guardar cambios de edición ────────────────────────────────────────────────
+  function guardarEdicion() {
+    if (!editandoPlaybook) return
+    setPlaybooks((prev) =>
+      prev.map((p) =>
+        p.id === editandoPlaybook.id
+          ? { ...p, titulo: editTitulo, descripcion: editDescripcion, pasos: editPasos }
+          : p
+      )
+    )
+    setEditandoPlaybook(null)
+    toast.success("Manual actualizado correctamente")
+  }
+
+  // ── Contador para IDs de playbooks nuevos ────────────────────────────────────
+  const nextIdRef = React.useRef(1000)
+
+  // ── Aceptar sugerencia de IA → se agrega a la lista de playbooks ─────────────
+  function aceptarSugerencia(sug: SugerenciaPlaybook) {
+    const nuevoId = ++nextIdRef.current
+    const iconoMap: Record<string, React.ReactNode> = {
+      QR: <QrCode className="size-5 text-purple-400" />,
+      Autenticación: <ShieldAlert className="size-5 text-orange-400" />,
+      AppSol: <BookOpen className="size-5 text-blue-400" />,
+      Transferencias: <ArrowLeftRight className="size-5 text-emerald-400" />,
+      Configuración: <Settings2 className="size-5 text-yellow-400" />,
+    }
+    setPlaybooks((prev) => [
+      ...prev,
+      {
+        id: nuevoId,
+        titulo: sug.titulo,
+        categoria: sug.categoria,
+        descripcion: sug.descripcion,
+        icono: iconoMap[sug.categoria] ?? <BookOpen className="size-5 text-blue-400" />,
+        pasos: sug.pasos,
+      },
+    ])
+    setSugerencias((prev) => prev.filter((s) => s.id !== sug.id))
+    toast.success("Playbook aceptado", { description: sug.titulo })
+  }
+
+  // ── Eliminar sugerencia de IA ─────────────────────────────────────────────────
+  function eliminarSugerencia(id: number) {
+    setSugerencias((prev) => prev.filter((s) => s.id !== id))
+    toast("Sugerencia descartada")
   }
 
   // ── Simular generación con IA (spinner 2 segundos) ──────────────────────────
@@ -303,7 +434,7 @@ export default function PlaybooksView() {
             <BookOpen className="size-3.5" />
             Manuales de Soporte
             <span className="ml-1.5 inline-flex size-4 items-center justify-center rounded-full bg-purple-900/60 text-purple-300 text-[10px] font-bold border border-purple-700/50 group-data-active:bg-purple-700/60">
-              {PLAYBOOKS_MOCK.length}
+              {playbooks.length}
             </span>
           </TabsTrigger>
           <TabsTrigger
@@ -315,6 +446,18 @@ export default function PlaybooksView() {
             <span className="ml-1.5 inline-flex items-center rounded-full bg-orange-900/50 px-1.5 py-px text-[10px] font-medium text-orange-300 border border-orange-700/50">
               Beta
             </span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="sugerencias"
+            className="data-active:bg-emerald-900/40 data-active:text-emerald-200 data-active:border-emerald-700/50 data-active:shadow-none"
+          >
+            <Lightbulb className="size-3.5" />
+            Sugerencias de IA
+            {sugerencias.length > 0 && (
+              <span className="ml-1.5 inline-flex size-4 items-center justify-center rounded-full bg-emerald-900/60 text-emerald-300 text-[10px] font-bold border border-emerald-700/50">
+                {sugerencias.length}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -331,7 +474,7 @@ export default function PlaybooksView() {
               Manuales de Soporte
             </h2>
             <span className="inline-flex items-center rounded-full bg-purple-900/60 px-2.5 py-0.5 text-xs font-medium text-purple-300 border border-purple-700/50">
-              {PLAYBOOKS_MOCK.length} manuales
+              {playbooks.length} manuales
             </span>
           </div>
 
@@ -441,6 +584,94 @@ export default function PlaybooksView() {
             })}
           </div>
         )}
+
+        {/* ── Acordeón "Todos los Playbooks" ── */}
+        <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-xl shadow-purple-900/10">
+          {/* Cabecera del acordeón — click para abrir/cerrar toda la sección */}
+          <button
+            onClick={() => setAcordeonAbierto((v) => !v)}
+            className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen className="size-4 text-purple-400" />
+              <span className="text-sm font-semibold text-foreground">Todos los Playbooks</span>
+              <span className="inline-flex items-center rounded-full bg-purple-900/60 px-2 py-0.5 text-[10px] font-bold text-purple-300 border border-purple-700/50">
+                {playbooks.length}
+              </span>
+            </div>
+            {acordeonAbierto ? (
+              <ChevronUp className="size-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="size-4 text-muted-foreground" />
+            )}
+          </button>
+
+          {/* Lista acordeón */}
+          <div className={`overflow-hidden transition-all duration-300 ${acordeonAbierto ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
+            <div className="border-t border-border divide-y divide-border">
+              {playbooks.map((pb, idx) => {
+                const expandido = expandidosAcordeon.has(pb.id)
+                const esNuevo = idx >= PLAYBOOKS_MOCK.length
+                return (
+                  <div key={pb.id} className={`transition-colors ${expandido ? "bg-muted/30" : "hover:bg-muted/20"}`}>
+                    {/* Fila del item */}
+                    <button
+                      onClick={() => toggleAcordeon(pb.id)}
+                      className="w-full flex items-center justify-between gap-4 px-5 py-3.5 text-left"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted border border-border">
+                          {pb.icono}
+                        </div>
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-medium text-foreground leading-snug truncate">{pb.titulo}</span>
+                            {esNuevo && (
+                              <span className="inline-flex items-center rounded-full bg-emerald-900/50 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-emerald-300 border border-emerald-700/50 shrink-0">
+                                Nuevo · IA
+                              </span>
+                            )}
+                          </div>
+                          <span className={`inline-flex items-center self-start rounded px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide border ${BADGE_COLORS[pb.categoria] ?? "bg-zinc-800 text-zinc-400 border-zinc-700"}`}>
+                            {pb.categoria}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] text-muted-foreground">{pb.pasos.length} pasos</span>
+                        {expandido ? <ChevronUp className="size-3.5 text-muted-foreground" /> : <ChevronDown className="size-3.5 text-muted-foreground" />}
+                      </div>
+                    </button>
+
+                    {/* Contenido expandido */}
+                    <div className={`overflow-hidden transition-all duration-300 ${expandido ? "max-h-125 opacity-100" : "max-h-0 opacity-0"}`}>
+                      <div className="px-5 pb-4 flex flex-col gap-3">
+                        <p className="text-xs text-muted-foreground leading-relaxed">{pb.descripcion}</p>
+                        <ol className="flex flex-col gap-2">
+                          {pb.pasos.map((paso) => (
+                            <li key={paso.numero} className="flex items-start gap-2.5 text-xs text-foreground/80">
+                              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-purple-900/60 text-purple-300 font-bold text-[10px] border border-purple-800/50 mt-px">
+                                {paso.numero}
+                              </span>
+                              <span className="leading-relaxed">{paso.descripcion}</span>
+                            </li>
+                          ))}
+                        </ol>
+                        <button
+                          onClick={() => setSelectedPlaybook(pb)}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-purple-400 hover:text-purple-300 transition-colors w-fit pt-1"
+                        >
+                          Ver detalle completo →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
         </section>
         </TabsContent>
 
@@ -559,6 +790,92 @@ export default function PlaybooksView() {
             </ol>
           </div>
         )}
+        </section>
+        </TabsContent>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          SECCIÓN 3 — Sugerencias de playbooks propuestos por la IA
+      ════════════════════════════════════════════════════════════════════════ */}
+        <TabsContent value="sugerencias">
+        <section className="flex flex-col gap-6">
+          {/* Encabezado */}
+          <div className="flex items-center gap-3">
+            <div className="flex size-8 items-center justify-center rounded-xl bg-linear-to-br from-emerald-600 to-emerald-400">
+              <Lightbulb className="size-4 text-white" />
+            </div>
+            <h2 className="text-xl font-semibold text-foreground">Sugerencias de IA</h2>
+            <span className="inline-flex items-center rounded-full bg-emerald-900/50 px-2.5 py-0.5 text-xs font-medium text-emerald-300 border border-emerald-700/50">
+              {sugerencias.length} pendientes
+            </span>
+          </div>
+
+          <p className="text-sm text-muted-foreground -mt-2">
+            La IA analizó los tickets recientes y sugiere los siguientes playbooks nuevos. Puedes aceptarlos para añadirlos a la base de conocimiento o descartarlos.
+          </p>
+
+          {sugerencias.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-16 text-center">
+              <CheckCircle2 className="size-10 text-emerald-500/50" />
+              <p className="text-sm text-muted-foreground">No hay sugerencias pendientes. ¡Todo está al día!</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {sugerencias.map((sug) => (
+                <div key={sug.id} className="flex flex-col rounded-2xl border border-border bg-card shadow-xl shadow-purple-900/10 overflow-hidden">
+                  {/* Cabecera */}
+                  <div className="flex items-start justify-between gap-4 p-5 pb-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-900/40 border border-emerald-700/40">
+                        <Lightbulb className="size-4 text-emerald-400" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <span className={`inline-flex items-center self-start rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide border ${BADGE_COLORS[sug.categoria] ?? "bg-zinc-800 text-zinc-400 border-zinc-700"}`}>
+                          {sug.categoria}
+                        </span>
+                        <h3 className="text-sm font-semibold text-foreground leading-snug">{sug.titulo}</h3>
+                        <p className="text-xs text-muted-foreground">{sug.descripcion}</p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center rounded-full bg-emerald-900/40 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-700/40 shrink-0 mt-1">
+                      Propuesto por IA
+                    </span>
+                  </div>
+
+                  {/* Pasos resumidos */}
+                  <div className="px-5 pb-4">
+                    <ol className="flex flex-col gap-1.5 mb-4">
+                      {sug.pasos.map((paso) => (
+                        <li key={paso.numero} className="flex items-start gap-2 text-xs text-foreground/80">
+                          <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-900/60 text-emerald-300 font-bold text-[9px] border border-emerald-800/50 mt-px">
+                            {paso.numero}
+                          </span>
+                          <span className="leading-relaxed">{paso.descripcion}</span>
+                        </li>
+                      ))}
+                    </ol>
+
+                    {/* Acciones */}
+                    <div className="flex items-center gap-3 pt-3 border-t border-border">
+                      <button
+                        onClick={() => aceptarSugerencia(sug)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition-all duration-200 hover:from-emerald-500 hover:to-emerald-400"
+                      >
+                        <ThumbsUp className="size-4" />
+                        Aceptar playbook
+                      </button>
+                      <button
+                        onClick={() => eliminarSugerencia(sug.id)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      >
+                        <Trash2 className="size-4" />
+                        Descartar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
         </TabsContent>
       </Tabs>
@@ -684,6 +1001,7 @@ export default function PlaybooksView() {
                       Cerrar
                     </DialogPrimitive.Close>
                     <button
+                      onClick={() => abrirEdicion(selectedPlaybook)}
                       className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-orange-600 to-orange-400 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-900/30 transition-all duration-200 hover:from-orange-500 hover:to-orange-300"
                     >
                       <Edit className="size-4" />
@@ -693,6 +1011,119 @@ export default function PlaybooksView() {
                 </>
               )
             })()}
+          </DialogPrimitive.Popup>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODAL DE EDICIÓN — Editar título, descripción y pasos del playbook
+      ════════════════════════════════════════════════════════════════════════ */}
+      <DialogPrimitive.Root
+        open={editandoPlaybook !== null}
+        onOpenChange={(open: boolean) => { if (!open) setEditandoPlaybook(null) }}
+      >
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-200 data-starting-style:opacity-0 data-ending-style:opacity-0" />
+          <DialogPrimitive.Popup className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-2xl max-h-[90vh] -translate-x-1/2 -translate-y-1/2 flex flex-col rounded-2xl border border-border bg-card shadow-2xl shadow-orange-900/20 overflow-hidden transition-all duration-200 data-starting-style:opacity-0 data-starting-style:scale-95 data-ending-style:opacity-0 data-ending-style:scale-95">
+            {editandoPlaybook && (
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between gap-4 px-6 pt-6 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-8 items-center justify-center rounded-xl bg-orange-900/40 border border-orange-700/40">
+                      <Edit className="size-4 text-orange-400" />
+                    </div>
+                    <DialogPrimitive.Title className="text-base font-semibold text-foreground">
+                      Editar Manual
+                    </DialogPrimitive.Title>
+                  </div>
+                  <DialogPrimitive.Close
+                    onClick={() => setEditandoPlaybook(null)}
+                    className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors text-lg leading-none"
+                  >
+                    ×
+                  </DialogPrimitive.Close>
+                </div>
+
+                <Separator className="bg-border" />
+
+                {/* Formulario de edición */}
+                <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+                  {/* Título */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Título del manual</label>
+                    <Input
+                      value={editTitulo}
+                      onChange={(e) => setEditTitulo(e.target.value)}
+                      className="h-10 bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:border-orange-500 focus-visible:ring-orange-500/20"
+                    />
+                  </div>
+
+                  {/* Descripción */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Descripción breve</label>
+                    <textarea
+                      rows={2}
+                      value={editDescripcion}
+                      onChange={(e) => setEditDescripcion(e.target.value)}
+                      className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20"
+                    />
+                  </div>
+
+                  {/* Pasos */}
+                  <div className="flex flex-col gap-3">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pasos de resolución</label>
+                    {editPasos.map((paso, idx) => (
+                      <div key={paso.numero} className="flex items-start gap-3">
+                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-orange-900/50 text-orange-300 text-[11px] font-bold border border-orange-700/50 mt-2">
+                          {paso.numero}
+                        </span>
+                        <textarea
+                          rows={2}
+                          value={paso.descripcion}
+                          onChange={(e) => {
+                            const nuevos = [...editPasos]
+                            nuevos[idx] = { ...nuevos[idx], descripcion: e.target.value }
+                            setEditPasos(nuevos)
+                          }}
+                          className="flex-1 resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20"
+                        />
+                        <button
+                          onClick={() => setEditPasos((prev) => prev.filter((_, i) => i !== idx).map((p, i) => ({ ...p, numero: i + 1 })))}
+                          className="mt-2 flex size-6 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-red-400 hover:border-red-500/40 hover:bg-red-900/20 transition-colors"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => setEditPasos((prev) => [...prev, { numero: prev.length + 1, descripcion: "" }])}
+                      className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 transition-colors w-fit mt-1"
+                    >
+                      + Agregar paso
+                    </button>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center gap-3 px-6 py-4 border-t border-border">
+                  <DialogPrimitive.Close
+                    onClick={() => setEditandoPlaybook(null)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-transparent px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-muted transition-colors"
+                  >
+                    Cancelar
+                  </DialogPrimitive.Close>
+                  <button
+                    onClick={guardarEdicion}
+                    disabled={!editTitulo.trim()}
+                    className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-orange-600 to-orange-400 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-900/30 transition-all duration-200 hover:from-orange-500 hover:to-orange-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Save className="size-4" />
+                    Guardar cambios
+                  </button>
+                </div>
+              </>
+            )}
           </DialogPrimitive.Popup>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
